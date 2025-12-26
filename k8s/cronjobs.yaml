@@ -1,0 +1,105 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: news-ingestion
+spec:
+  schedule: "0 * * * *"  # Every hour
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: ingest
+            image: gcr.io/YOUR_PROJECT_ID/news-triage-web:latest
+            command: ["uv", "run", "python", "src/scripts/ingest_news.py"]
+            env:
+            - name: DB_HOST
+              value: postgres
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: mlflow_db
+            - name: DB_USER
+              value: mlflow_user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+          restartPolicy: OnFailure
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: embedding-generation
+spec:
+  schedule: "30 * * * *"  # 30 minutes past every hour
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: embed
+            image: gcr.io/YOUR_PROJECT_ID/news-triage-web:latest
+            command: ["uv", "run", "python", "src/scripts/generate_embeddings.py"]
+            env:
+            - name: DB_HOST
+              value: postgres
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: mlflow_db
+            - name: DB_USER
+              value: mlflow_user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            resources:
+              requests:
+                memory: "2Gi"
+                cpu: "500m"
+              limits:
+                memory: "4Gi"
+                cpu: "1000m"
+          restartPolicy: OnFailure
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: model-training
+spec:
+  schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: train
+            image: gcr.io/YOUR_PROJECT_ID/news-triage-web:latest
+            command: ["uv", "run", "python", "src/scripts/train.py"]
+            env:
+            - name: DB_HOST
+              value: postgres
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: mlflow_db
+            - name: DB_USER
+              value: mlflow_user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: MLFLOW_TRACKING_URI
+              value: http://mlflow:5000
+            resources:
+              requests:
+                memory: "2Gi"
+                cpu: "500m"
+              limits:
+                memory: "4Gi"
+                cpu: "1000m"
+          restartPolicy: OnFailure

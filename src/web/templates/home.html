@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybersecurity News - Past Week</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f6f8fa;
+            color: #24292f;
+            line-height: 1.5;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid #d0d7de;
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #24292f;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 6px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid #d0d7de;
+            transition: all 0.15s ease;
+        }
+
+        .btn-primary {
+            background: #2da44e;
+            color: white;
+            border-color: #2da44e;
+        }
+
+        .btn-primary:hover {
+            background: #2c974b;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #24292f;
+        }
+
+        .btn-secondary:hover {
+            background: #f6f8fa;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .stats-bar {
+            background: white;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 32px;
+            font-size: 14px;
+        }
+
+        .stat {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .stat-label {
+            color: #57606a;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #24292f;
+        }
+
+        .filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            border: 1px solid #d0d7de;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #24292f;
+            font-weight: 500;
+            transition: all 0.15s ease;
+        }
+
+        .filter-btn:hover {
+            background: #f6f8fa;
+        }
+
+        .filter-btn.active {
+            background: #ddf4ff;
+            border-color: #54aeff;
+            color: #0969da;
+        }
+
+        .article-list {
+            background: white;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+        }
+
+        .article-item {
+            border-bottom: 1px solid #d0d7de;
+            padding: 16px;
+        }
+
+        .article-item:last-child {
+            border-bottom: none;
+        }
+
+        .article-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .article-vote {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-width: 40px;
+            padding-top: 2px;
+        }
+
+        .vote-btn {
+            cursor: pointer;
+            color: #57606a;
+            font-size: 20px;
+            line-height: 1;
+            user-select: none;
+            transition: color 0.1s;
+        }
+
+        .vote-btn:hover {
+            color: #24292f;
+        }
+
+        .vote-btn.relevant {
+            color: #1a7f37;
+        }
+
+        .vote-btn.not-relevant {
+            color: #cf222e;
+        }
+
+        .vote-count {
+            font-size: 12px;
+            font-weight: 600;
+            color: #24292f;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .article-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .article-title-row {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .article-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #24292f;
+            flex: 1;
+        }
+
+        .article-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-relevant {
+            background: #dafbe1;
+            color: #1a7f37;
+        }
+
+        .badge-not-relevant {
+            background: #ffebe9;
+            color: #cf222e;
+        }
+
+        .article-meta {
+            display: flex;
+            gap: 8px;
+            font-size: 12px;
+            color: #57606a;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .meta-source {
+            font-weight: 600;
+            color: #24292f;
+        }
+
+        .meta-dot {
+            color: #d0d7de;
+        }
+
+        .article-content {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #24292f;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .article-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: 1px solid #d0d7de;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.1s;
+        }
+
+        .action-btn:hover {
+            background: #f6f8fa;
+        }
+
+        .action-btn.relevant {
+            background: #2da44e;
+            color: white;
+            border-color: #2da44e;
+        }
+
+        .action-btn.relevant:hover {
+            background: #2c974b;
+        }
+
+        .action-btn.not-relevant {
+            background: #cf222e;
+            color: white;
+            border-color: #cf222e;
+        }
+
+        .action-btn.not-relevant:hover {
+            background: #bc2a2a;
+        }
+
+        .loading, .empty {
+            text-align: center;
+            padding: 48px 16px;
+            color: #57606a;
+        }
+
+        .empty h2 {
+            color: #24292f;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>🛡️ Cybersecurity News - Past Week</h1>
+            <div class="header-nav">
+                <a href="/label" class="btn btn-secondary">Focused Labeling</a>
+                <a href="http://localhost:5000" class="btn btn-secondary" target="_blank">MLflow</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats-bar" id="stats">
+            <div class="stat">
+                <span class="stat-label">Total:</span>
+                <span class="stat-value">-</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Labeled:</span>
+                <span class="stat-value">-</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Relevant:</span>
+                <span class="stat-value">-</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">This Week:</span>
+                <span class="stat-value">-</span>
+            </div>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="relevant">Relevant</button>
+            <button class="filter-btn" data-filter="not_relevant">Not Relevant</button>
+            <button class="filter-btn" data-filter="unlabeled">Unlabeled</button>
+        </div>
+
+        <div id="articles-container">
+            <div class="loading">Loading articles...</div>
+        </div>
+    </div>
+
+    <script>
+        let allArticles = [];
+        let currentFilter = 'all';
+
+        async function loadArticles() {
+            const response = await fetch('/api/recent_articles?days=7');
+            const data = await response.json();
+            // Sort by upvotes (descending)
+            allArticles = data.articles.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
+            renderArticles();
+            updateStats();
+        }
+
+        function renderArticles() {
+            const container = document.getElementById('articles-container');
+
+            let filtered = allArticles;
+            if (currentFilter === 'relevant') {
+                filtered = allArticles.filter(a => a.user_vote === 'relevant');
+            } else if (currentFilter === 'not_relevant') {
+                filtered = allArticles.filter(a => a.user_vote === 'not_relevant');
+            } else if (currentFilter === 'unlabeled') {
+                filtered = allArticles.filter(a => !a.user_vote);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty">
+                        <h2>No Articles Found</h2>
+                        <p>Try adjusting your filters or run the ingestion script.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const list = document.createElement('div');
+            list.className = 'article-list';
+
+            filtered.forEach(article => {
+                const item = createArticleItem(article);
+                list.appendChild(item);
+            });
+
+            container.innerHTML = '';
+            container.appendChild(list);
+        }
+
+        function createArticleItem(article) {
+            const item = document.createElement('div');
+            item.className = 'article-item';
+
+            const date = article.published_at
+                ? new Date(article.published_at).toLocaleDateString('en-US', {
+                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                })
+                : 'Unknown';
+
+            const upvotes = article.upvotes || 0;
+            const downvotes = article.downvotes || 0;
+            const netVotes = upvotes - downvotes;
+            const voteUpClass = article.user_vote === 'relevant' ? 'relevant' : '';
+            const voteDownClass = article.user_vote === 'not_relevant' ? 'not-relevant' : '';
+
+            const badgeHTML = article.user_vote
+                ? `<span class="article-badge badge-${article.user_vote}">${article.user_vote === 'relevant' ? 'You: Relevant' : 'You: Not Relevant'}</span>`
+                : '';
+
+            item.innerHTML = `
+                <div class="article-header">
+                    <div class="article-vote">
+                        <span class="vote-btn ${voteUpClass}" onclick="quickLabel(event, ${article.id}, 'relevant')">▲</span>
+                        <span class="vote-count">${netVotes}</span>
+                        <span class="vote-btn ${voteDownClass}" onclick="quickLabel(event, ${article.id}, 'not_relevant')">▼</span>
+                    </div>
+                    <div class="article-main">
+                        <div class="article-title-row">
+                            <div class="article-title">${article.title}</div>
+                            ${badgeHTML}
+                        </div>
+                        <div class="article-meta">
+                            <span class="meta-item meta-source">${article.source}</span>
+                            <span class="meta-dot">•</span>
+                            <span class="meta-item">${date}</span>
+                            <span class="meta-dot">•</span>
+                            <span class="meta-item">${upvotes} up, ${downvotes} down</span>
+                        </div>
+                        <div class="article-content">${article.content}</div>
+                        <div class="article-actions">
+                            <button class="action-btn ${article.user_vote === 'relevant' ? 'relevant' : ''}" onclick="labelArticle(event, ${article.id}, 'relevant')">✓ Mark Relevant</button>
+                            <button class="action-btn ${article.user_vote === 'not_relevant' ? 'not-relevant' : ''}" onclick="labelArticle(event, ${article.id}, 'not_relevant')">✗ Not Relevant</button>
+                            <a href="${article.url}" target="_blank" class="action-btn">Read Full Article →</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return item;
+        }
+
+        async function quickLabel(event, articleId, label) {
+            event.stopPropagation();
+            await submitLabel(articleId, label);
+        }
+
+        async function labelArticle(event, articleId, label) {
+            event.stopPropagation();
+            await submitLabel(articleId, label);
+        }
+
+        async function submitLabel(articleId, label) {
+            const response = await fetch('/api/label', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ article_id: articleId, label: label })
+            });
+
+            if (response.ok) {
+                // Reload articles to get updated vote counts
+                await loadArticles();
+            }
+        }
+
+        function updateStats() {
+            const totalArticles = allArticles.length;
+            const labeled = allArticles.filter(a => a.user_vote).length;
+            const relevant = allArticles.filter(a => a.user_vote === 'relevant').length;
+
+            document.getElementById('stats').innerHTML = `
+                <div class="stat">
+                    <span class="stat-label">Total:</span>
+                    <span class="stat-value">${totalArticles}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">You Labeled:</span>
+                    <span class="stat-value">${labeled}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">You Marked Relevant:</span>
+                    <span class="stat-value">${relevant}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">This Week:</span>
+                    <span class="stat-value">${totalArticles}</span>
+                </div>
+            `;
+        }
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderArticles();
+            });
+        });
+
+        // Initialize
+        loadArticles();
+    </script>
+</body>
+</html>

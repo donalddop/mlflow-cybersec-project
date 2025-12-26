@@ -1,0 +1,47 @@
+# docker-compose.yml
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: mlflow_postgres
+    environment:
+      - POSTGRES_USER=mlflow_user
+      - POSTGRES_PASSWORD=mlflow_password
+      - POSTGRES_DB=mlflow_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mlflow_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mlflow:
+    image: python:3.9-slim
+    container_name: mlflow_server
+    command:
+      - /bin/sh
+      - -c
+      - |
+        pip install mlflow psycopg2-binary
+        mlflow server \
+          --backend-store-uri postgresql://mlflow_user:mlflow_password@postgres/mlflow_db \
+          --default-artifact-root mlflow-artifacts:/mlruns \
+          --artifacts-destination /mlruns \
+          --host 0.0.0.0 \
+          --serve-artifacts
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlruns
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_db_data:
+  mlflow_data:
+

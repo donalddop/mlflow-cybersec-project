@@ -1,0 +1,15 @@
+[project]
+name = "mlflow-project"
+version = "0.1.0"
+description = "AI-Driven Cybersecurity Signal Triage Platform"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mlflow>=3.8.1",
+    "scikit-learn>=1.7.2",
+    "psycopg2-binary>=2.9.10",
+    "feedparser>=6.0.11",
+    "requests>=2.32.3",
+    "sentence-transformers>=3.4.1",
+    "flask>=3.1.0",
+]

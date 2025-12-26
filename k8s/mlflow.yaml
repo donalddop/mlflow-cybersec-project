@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mlflow-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlflow
+  template:
+    metadata:
+      labels:
+        app: mlflow
+    spec:
+      containers:
+      - name: mlflow
+        image: python:3.9-slim
+        command:
+        - /bin/sh
+        - -c
+        - |
+          pip install mlflow psycopg2-binary
+          mlflow server \
+            --backend-store-uri postgresql://mlflow_user:mlflow_password@postgres:5432/mlflow_db \
+            --default-artifact-root mlflow-artifacts:/mlruns \
+            --artifacts-destination /mlruns \
+            --host 0.0.0.0 \
+            --serve-artifacts
+        ports:
+        - containerPort: 5000
+        volumeMounts:
+        - name: mlflow-storage
+          mountPath: /mlruns
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      volumes:
+      - name: mlflow-storage
+        persistentVolumeClaim:
+          claimName: mlflow-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlflow
+spec:
+  selector:
+    app: mlflow
+  ports:
+  - port: 5000
+    targetPort: 5000
+  type: LoadBalancer  # Change to ClusterIP if using Ingress

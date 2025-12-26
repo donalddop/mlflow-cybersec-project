@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies
+      run: uv sync
+
+    - name: Check code formatting
+      run: |
+        uv run python -m py_compile src/**/*.py
+        uv run python -m py_compile config/config.py
+
+    - name: Validate project structure
+      run: |
+        test -f config/config.py
+        test -f src/scripts/init_db.py
+        test -f src/scripts/ingest_news.py
+        test -f src/scripts/generate_embeddings.py
+        test -f src/scripts/train.py
+        test -f src/web/app.py
+        test -f k8s/postgres.yaml
+        test -f k8s/mlflow.yaml
+        test -f k8s/web-app.yaml
+        test -f k8s/cronjobs.yaml
